@@ -8,10 +8,13 @@ cap = cv2.VideoCapture(0)
 while(True):
     ret, frame = cap.read()
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    aruco_dict = aruco.Dictionary_get(aruco.DICT_6X6_250)
+
+    aruco_dict = aruco.Dictionary_get(aruco.DICT_ARUCO_ORIGINAL)
     arucoParameters = aruco.DetectorParameters_create()
     corners, ids, rejectedImgPoints = aruco.detectMarkers(
         gray, aruco_dict, parameters=arucoParameters)
+    print(ids)
+
     if np.all(ids != None):
         display = aruco.drawDetectedMarkers(frame, corners)
         x1 = (corners[0][0][0][0], corners[0][0][0][1])
@@ -20,9 +23,9 @@ while(True):
         x4 = (corners[0][0][3][0], corners[0][0][3][1])
 
         im_dst = frame
-        im_src = cv2.imread("sample1.jpeg")
+        im_src = cv2.imread("sample1.jpg")
         size = im_src.shape
-        pts_dst = np.array([x1, x2, x3, x4])
+        pts_dst = np.array([x1, x2, x3, x4]) #pts1
         pts_src = np.array(
             [
                 [0, 0],
