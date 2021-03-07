@@ -16,14 +16,14 @@ while(True):
     print(ids)
 
     if np.all(ids != None):
-        display = aruco.drawDetectedMarkers(frame, corners)
+        display = aruco.drawDetectedMarkers(frame, corners, ids)
         x1 = (corners[0][0][0][0], corners[0][0][0][1])
         x2 = (corners[0][0][1][0], corners[0][0][1][1])
         x3 = (corners[0][0][2][0], corners[0][0][2][1])
         x4 = (corners[0][0][3][0], corners[0][0][3][1])
 
         im_dst = frame
-        im_src = cv2.imread("sample1.jpg")
+        im_src = cv2.imread("Objects/52.jpg")
         size = im_src.shape
         pts_dst = np.array([x1, x2, x3, x4]) #pts1
         pts_src = np.array(
