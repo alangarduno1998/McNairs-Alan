@@ -3,6 +3,16 @@ import cv2
 import cv2.aruco as aruco
 import os
 
+def loadArucoImages(path):
+    ObjectList = os.listdir(path)
+    numOfMarkers = len(ObjectList)
+    print("Total Number of Objects Detected:", numOfMarkers)
+    objDicts = {}
+    for imgPath in ObjectList:
+        key = int(os.path.splitext(imgPath)[0])
+        frameEmbed = cv2.imread(f'{path}/{imgPath}')
+        objDicts[key] = frameEmbed
+    return objDicts
 
 def FindArucoMarkers(frame, markerSize = 6, totalMarkers=250, draw=True):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -13,7 +23,7 @@ def FindArucoMarkers(frame, markerSize = 6, totalMarkers=250, draw=True):
     corners, ids, rejectedImgPoints = aruco.detectMarkers(gray, aruco_dict, parameters = arucoParameters)
     #print(ids)
     if draw:
-        display = aruco.drawDetectedMarkers(frame, corners)
+        display = aruco.drawDetectedMarkers(frame, corners, ids)
     return [corners, ids]
 
 def EmbedArucoImage(corners, id, frame, frameEmbed, drawId=True):
@@ -39,18 +49,23 @@ def EmbedArucoImage(corners, id, frame, frameEmbed, drawId=True):
     frameOut = cv2.warpPerspective(frameEmbed, matrix, (frame.shape[1], frame.shape[0]))
     cv2.fillConvexPoly(frame, pts_dst.astype(int), 0, 16)
     frameOut = frame + frameOut
+
+    #if drawId:
+        #cv2.putTex
     return frameOut
 
 def main():
     cap = cv2.VideoCapture(0)
+    objDicts = loadArucoImages("Objects")
 
     while(True):
         ret, frame = cap.read()
-        frameEmbed = cv2.imread("sample1.jpg")
+        loadArucoImages("Objects")
         ArucoFound = FindArucoMarkers(frame)
         if len(ArucoFound[0])!=0:
             for corners, id in zip(ArucoFound[0], ArucoFound[1]):
-                frame = EmbedArucoImage(corners, id, frame, frameEmbed)
+                if int(id) in objDicts.keys():
+                    frame = EmbedArucoImage(corners, id, frame, objDicts[int(id)])
         cv2.imshow('Display', frame)
         cv2.waitKey(1)
 
