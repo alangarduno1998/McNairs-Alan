@@ -6,7 +6,7 @@ import os
 def loadArucoImages(path):
     ObjectList = os.listdir(path)
     numOfMarkers = len(ObjectList)
-    print("Total Number of Objects Detected:", numOfMarkers)
+    print("Total Number of Objects:", numOfMarkers)
     objDicts = {}
     for imgPath in ObjectList:
         key = int(os.path.splitext(imgPath)[0])
@@ -50,8 +50,6 @@ def EmbedArucoImage(corners, id, frame, frameEmbed, drawId=True):
     cv2.fillConvexPoly(frame, pts_dst.astype(int), 0, 16)
     frameOut = frame + frameOut
 
-    #if drawId:
-        #cv2.putTex
     return frameOut
 
 def main():
