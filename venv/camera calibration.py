@@ -2,9 +2,9 @@
 import cv2
 import numpy as np
 import os
-import glob
+import glob2
 
-# import yaml
+import yaml
 
 # Define the dimensions of checkerboard
 CHECKERBOARD = (6, 9)
@@ -13,7 +13,7 @@ CHECKERBOARD = (6, 9)
 # accuracy, epsilon, is reached or 
 # specified number of iterations are completed. 
 criteria = (cv2.TERM_CRITERIA_EPS +
-            cv2.TERM_CRITERIA_MAX_ITER, 22, 0.001)
+            cv2.TERM_CRITERIA_MAX_ITER, 15, 0.001)
 
 # Vector for 3D points
 threedpoints = []
@@ -33,35 +33,35 @@ prev_img_shape = None
 # in a given directory. Since no path is 
 # specified, it will take current directory 
 # jpg files alone 
-images = glob.glob(r'cameracalib/*.jpg')
+images = glob2.glob(r'C:\Users\alang\PycharmProjects\McNair\venv\cameracalib\WIN_20210308_10_*_Pro.jpg')
 
 for filename in images:
     image = cv2.imread(filename)
     grayColor = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    print(images)
-    # Find the chess board corners 
-    # If desired number of corners are 
-    # found in the image then ret = true 
+
+    # Find the chess board corners
+    # If desired number of corners are
+    # found in the image then ret = true
     ret, corners = cv2.findChessboardCorners(
         grayColor, CHECKERBOARD,
         cv2.CALIB_CB_ADAPTIVE_THRESH
         + cv2.CALIB_CB_FAST_CHECK +
         cv2.CALIB_CB_NORMALIZE_IMAGE)
 
-    # If desired number of corners can be detected then, 
-    # refine the pixel coordinates and display 
-    # them on the images of checker board 
+    # If desired number of corners can be detected then,
+    # refine the pixel coordinates and display
+    # them on the images of checker board
     if ret == True:
         threedpoints.append(objectp3d)
 
-        # Refining pixel coordinates 
-        # for given 2d points. 
+        # Refining pixel coordinates
+        # for given 2d points.
         corners2 = cv2.cornerSubPix(
             grayColor, corners, (11, 11), (-1, -1), criteria)
 
         twodpoints.append(corners2)
 
-        # Draw and display the corners 
+        # Draw and display the corners
         image = cv2.drawChessboardCorners(image,
                                           CHECKERBOARD,
                                           corners2, ret)
@@ -74,11 +74,12 @@ cv2.destroyAllWindows()
 h, w = image.shape[:2]
 
 # Perform camera calibration by
-# passing the value of above found out 3D points (threedpoints) 
-# and its corresponding pixel coordinates of the 
-# detected corners (twodpoints) 
+# passing the value of above found out 3D points (threedpoints)
+# and its corresponding pixel coordinates of the
+# detected corners (twodpoints)
 ret, matrix, distortion, r_vecs, t_vecs = cv2.calibrateCamera(
     threedpoints, twodpoints, grayColor.shape[::-1], None, None)
+
 # Displayig required output
 print(" Camera matrix:")
 print(matrix)
@@ -91,3 +92,9 @@ print(r_vecs)
 
 print("\n Translation Vectors:")
 print(t_vecs)
+data = {'camera_matrix': np.asarray(matrix).tolist(),
+        'dist_coeff': np.asarray(distortion).tolist()}
+
+# and save it to a file
+with open("calibration_matrix.yaml", "w") as f:
+    yaml.dump(data, f)
