@@ -9,7 +9,7 @@ while(True):
     ret, frame = cap.read()
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-    aruco_dict = aruco.Dictionary_get(aruco.DICT_ARUCO_ORIGINAL)
+    aruco_dict = aruco.Dictionary_get(aruco.DICT_APRILTAG_36H11)
     arucoParameters = aruco.DetectorParameters_create()
     corners, ids, rejectedImgPoints = aruco.detectMarkers(
         gray, aruco_dict, parameters=arucoParameters)
@@ -23,7 +23,7 @@ while(True):
         x4 = (corners[0][0][3][0], corners[0][0][3][1])
 
         im_dst = frame
-        im_src = cv2.imread("Objects/52.jpg")
+        im_src = cv2.imread("Objects/55.jpg")
         size = im_src.shape
         pts_dst = np.array([x1, x2, x3, x4]) #pts1
         pts_src = np.array(
