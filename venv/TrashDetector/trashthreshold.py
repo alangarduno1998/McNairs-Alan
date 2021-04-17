@@ -10,6 +10,10 @@ def thresholding(img):
     lower = np.array([hsvVals_red[0], hsvVals_red[1], hsvVals_red[2]])
     upper = np.array([hsvVals_red[3], hsvVals_red[4], hsvVals_red[5]])
     mask = cv2.inRange(hsv, lower, upper)
+    return mask
+
+
+def edgedetection(imgThres, img):
     kernel = np.ones((2, 2), np.uint8)
     dilation = cv2.dilate(img, kernel, iterations=1)
 
@@ -17,8 +21,12 @@ def thresholding(img):
     closing = cv2.morphologyEx(dilation, cv2.MORPH_CLOSE, kernel)
 
     # Getting the edge of morphology
-    edge = cv2.Canny(closing, 175, 175)
-    return mask, edge
+    edge = cv2.Canny(closing, 170, 170)
+    contours = cv2.findContours(imgThres,
+                                cv2.RETR_EXTERNAL,
+                                cv2.CHAIN_APPROX_NONE)
+    cv2.drawContours(img, contours[0], -1, (0, 0, 255), thickness=2)
+    return edge
 
 
 def getContours(imgThres, img):
@@ -28,7 +36,7 @@ def getContours(imgThres, img):
     x, y, w, h = cv2.boundingRect(biggest)
     cx = x + w // 2
     cy = y + h // 2
-    cv2.drawContours(img, biggest, -1, (255,0,255), 7)
+    cv2.drawContours(img, biggest, -1, 255, 3) # was 7
     cv2.circle(img, (cx, cy), 10, (0, 255, 0), cv2.FILLED)
 
 
@@ -46,11 +54,13 @@ while True:
     success, img = img.read()
     img = cv2.resize(img, (width, height))
     img = cv2.flip(img, 0)
-
-    imgThres, edge = thresholding(img)
-
+    imgThres = thresholding(img)
+    edge = edgedetection(imgThres, img)
+    # edgeThres = thresholding(edge)
     cx = getContours(imgThres, img)  # for translation
+    # cx2 = getContours(edge, img)
     cv2.imshow("Output", img)
     cv2.imshow("Path", imgThres)
     cv2.imshow("edges", edge)
+    # cv2.imshow("Path2", edgeThres)
     cv2.waitKey(1)
