@@ -1,8 +1,11 @@
 import cv2
 import numpy as np
+
 cap = cv2.VideoCapture(0)
+
+
 def resizeimg(img):
-    scale_percent = 45  # percent of original size
+    scale_percent = 100  # percent of original size
     width = int(img.shape[1] * scale_percent / 100)
     height = int(img.shape[0] * scale_percent / 100)
     dim = (width, height)
@@ -41,16 +44,18 @@ def displaythresh(img):
     ret4, thresh4 = cv2.threshold(img, 127, 255, cv2.THRESH_TOZERO)
     ret5, thresh5 = cv2.threshold(img, 127, 255, cv2.THRESH_TOZERO_INV)
     # titles = np.array([['Original Image', 'BINARY'], ['BINARY_INV', 'TRUNC'],[ 'TOZERO', 'TOZERO_INV']],dtype=object)
-    images1 = np.concatenate((img, thresh1, thresh2), axis=0)  # concatenate horizontally
-    images2 = np.concatenate((thresh3, thresh4, thresh5), axis=0)  # concatenate vertically
-    img = np.concatenate((images1, images2), axis=1)
+    images1 = np.concatenate((img, thresh1, thresh2), axis=1)  # concatenate horizontally
+    images2 = np.concatenate((thresh3, thresh4, thresh5), axis=1)  # concatenate vertically
+    img = np.concatenate((images1, images2), axis=0)
     return img
 
 
+cap = cv2.VideoCapture(r"TrashDetector\VideoofDebris3StutteringFixed.mp4")
 while True:
-    _, img = cap.read()
+    ret, img = cap.read()
+    img = cv2.resize(img, (480,360))
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     imgresized = resizeimg(img)
     thold = displaythresh(imgresized)
     cv2.imshow("EH", thold)
-    cv2.waitKey(1)
+    cv2.waitKey(200)
