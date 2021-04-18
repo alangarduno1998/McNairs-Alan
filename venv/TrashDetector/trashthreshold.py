@@ -21,10 +21,12 @@ def edgedetection(imgThres, img):
     closing = cv2.morphologyEx(dilation, cv2.MORPH_CLOSE, kernel)
 
     # Getting the edge of morphology
-    edge = cv2.Canny(closing, 170, 170)
-    contours = cv2.findContours(imgThres,
+    edge = cv2.Canny(closing, 200,250)
+    contours = cv2.findContours(edge,
                                 cv2.RETR_EXTERNAL,
                                 cv2.CHAIN_APPROX_NONE)
+    biggest = max(contours[0], key=cv2.contourArea)
+    cv2.drawContours(img, biggest, -1, (0, 0, 255), thickness=2)
     cv2.drawContours(img, contours[0], -1, (0, 0, 255), thickness=2)
     return edge
 
@@ -36,18 +38,9 @@ def getContours(imgThres, img):
     x, y, w, h = cv2.boundingRect(biggest)
     cx = x + w // 2
     cy = y + h // 2
-    cv2.drawContours(img, biggest, -1, 255, 3) # was 7
-    cv2.circle(img, (cx, cy), 10, (0, 255, 0), cv2.FILLED)
-
-
-    cnt = contours[3]
-    x1, y1, w1, h1 = cv2.boundingRect(cnt)
-    cx1 = x1 + w1 // 2
-    cy1 = y1 + h1 // 2
-    cv2.drawContours(img, [cnt], 0, (255,0,255), 3)
-    cv2.circle(img, (cx1, cy1), 10, (0, 255, 0), cv2.FILLED)
-
+    #cv2.drawContours(img, biggest, -1, 255, 3) # was 7
     return cx
+
 
 while True:
     img = cv2.VideoCapture("VideoofDebris3StutteringFixed.mp4")
@@ -56,11 +49,11 @@ while True:
     img = cv2.flip(img, 0)
     imgThres = thresholding(img)
     edge = edgedetection(imgThres, img)
-    # edgeThres = thresholding(edge)
+    #edgeThres = thresholding(edge)
     cx = getContours(imgThres, img)  # for translation
-    # cx2 = getContours(edge, img)
+    #cx2 = getContours(edge, img)
     cv2.imshow("Output", img)
     cv2.imshow("Path", imgThres)
     cv2.imshow("edges", edge)
-    # cv2.imshow("Path2", edgeThres)
+    #cv2.imshow("Path2", edgeThres)
     cv2.waitKey(1)
