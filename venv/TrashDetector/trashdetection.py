@@ -5,7 +5,8 @@ import numpy as np
 
 frameWidth = 440
 frameHeight = 360
-
+width = 440
+height = 360
 
 #drone = tello.Tello()
 #drone.connect()
@@ -31,12 +32,32 @@ cv2.createTrackbar("VALUE Max", "HSV", 255, 255, empty)
 frameCounter = 0
 
 while True:
-    img = cv2.VideoCapture("VideoofDebris3StutteringFixed.mp4")
-    success, img = img.read()
+    cap = cv2.VideoCapture("VideoofDebris3StutteringFixed.mp4")
+    success, img = cap.read()
     #img = drone.get_frame_read().frame
+    ret, frame = cap.read()
+    frame = cv2.resize(frame, (width, height))
+    #frame = cv2.flip(frame, 0)
+    ret, display = cap.read()
+    ret, image = cap.read()
+    display = cv2.resize(display, (width, height))
+    image = cv2.resize(image, (width, height))
+    ret, mask = cap.read()
+    mask = cv2.resize(mask, (width, height))
+    g = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+    edge = cv2.Canny(g, 60, 60, apertureSize=7, L2gradient=True)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+    r, t = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY_INV)
+    contours, h = cv2.findContours(t, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+    contours = sorted(contours, key=cv2.contourArea, reverse=True)
+    cv2.drawContours(image, contours, -1, (0, 0, 255), thickness=5)
+    result = cv2.bitwise_and(mask, mask, mask=t)
 
+    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+    t1 = cv2.cvtColor(t, cv2.COLOR_GRAY2BGR)
     #_,img = cap.read()
-
+    img=result
     img = cv2.resize(img, (frameWidth, frameHeight))
     #img = cv2.flip(img,0)
     imgHsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
