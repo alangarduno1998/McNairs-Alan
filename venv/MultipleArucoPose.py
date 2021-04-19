@@ -34,18 +34,20 @@ def findarucomarkers(frame, markersize = 6, totalmarkers=250, draw=True):
 
 
 def findaruco(corners, id, frame, frameembed, ArucoListC, ArucoListArea, drawPose=True, drawIm=True):
-    cx = (corners[0][0][0] +corners[0][3][0]) / 2
+    cx = (corners[0][0][0] +corners[0][2][0]) / 2
     cy = (corners[0][0][1] + corners[0][3][1]) / 2
     rvec, tvec, markerPoints = aruco.estimatePoseSingleMarkers(corners, 0.02, camera_matrix,
                                                                dist_coeff)
     (rvec - tvec).any()  # get rid of that nasty numpy value array error
-    if drawPose:
-        aruco.drawAxis(frame, camera_matrix, dist_coeff, rvec, tvec, 0.02)
-        # testing this
-
     ArucoListC.append([cx, cy])
     area = cv2.contourArea(corners)
     ArucoListArea.append(area)
+    if drawPose:
+        aruco.drawAxis(frame, camera_matrix, dist_coeff, rvec, tvec, 0.02)
+        # testing this
+        cv2.putText(frame, str(int(area)), (int(cx), int(cy)), cv2.FONT_ITALIC, 0.7, (0, 255, 0), 1)
+        #cv2.putText(frame, str(int(cx)) + str(int(cx)), (int(cx), int(cy)), cv2.FONT_ITALIC, 0.7, (0, 255, 0), 1)
+
     frameout = frame
     if drawIm:
 
@@ -85,7 +87,7 @@ def main():
         if len(arucofound[0]) != 0:
             for corners, id in zip(arucofound[0], arucofound[1]):
                 if int(id) in objdicts.keys():
-                    frame, info[0], info[1] = findaruco(corners, id, frame, objdicts[int(id)], ArucoListC, ArucoListArea, drawPose=False, drawIm=True)
+                    frame, info[0], info[1] = findaruco(corners, id, frame, objdicts[int(id)], ArucoListC, ArucoListArea, drawPose=True, drawIm=False)
         if len(info[1]) == 1:
             print(info)
         cv2.imshow('Display', frame)
