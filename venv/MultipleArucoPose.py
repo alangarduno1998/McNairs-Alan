@@ -2,6 +2,8 @@ import numpy as np
 import cv2
 import cv2.aruco as aruco
 import os
+
+
 camera_matrix = [[1448, 0, 624], [0, 1448, 316],
                  [0, 0, 1]]
 camera_matrix = np.float32(camera_matrix)
