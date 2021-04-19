@@ -22,7 +22,8 @@ def makeframes(cap, width, height):
 def binarythreshold(image):
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-    r, t = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY_INV+cv2.THRESH_TOZERO)
+    blur = cv2.GaussianBlur(gray, (5, 5), 0)
+    r, t = cv2.threshold(blur, 127, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
     image = cv2.bitwise_and(immask, immask, mask=t)
     return image, gray, t
 
@@ -40,18 +41,19 @@ def edgethreshold(result, display):
     g = cv2.cvtColor(result, cv2.COLOR_RGB2GRAY)
     edge = cv2.Canny(g, 60, 60)
     # plotting biggest contour to second frame
+    edgeres = cv2.bitwise_and(t, t, mask=edge)
     contours, h = cv2.findContours(edge,
                                    cv2.RETR_EXTERNAL,
                                    cv2.CHAIN_APPROX_NONE)
-    #cv2.drawContours(display, contours[0], -1, (0, 0, 255), thickness=2)
+    # cv2.drawContours(display, contours[0], -1, (0, 0, 255), thickness=2)
     contours = sorted(contours, key=cv2.contourArea, reverse=True)
     biggest = max(contours, key=cv2.contourArea)
     x, y, w, h = cv2.boundingRect(biggest)
     cx = x + w // 2
-    cy = y + h // 2
-    cv2.rectangle(display, (x, y), (x+w,y+h), (255, 0, 255), 3)
-    #cv2.drawContours(display, contours[0], -1, (0, 0, 255), thickness=5)
-    edgeres = cv2.bitwise_and(t, t, mask=edge)
+    # cy = y + h // 2
+    cv2.rectangle(display, (x, y), (x+w, y+h), (255, 0, 255), 3)
+    cv2.putText(display, str("trash"), (cx, y), cv2.FONT_ITALIC, 0.7, (255, 0, 255), 1)
+    # cv2.drawContours(display, contours[0], -1, (0, 0, 255), thickness=5)
     return edgeres
 
 
@@ -60,9 +62,10 @@ def findcontours(mask, display):
     biggest = max(contours, key=cv2.contourArea)
     x, y, w, h = cv2.boundingRect(biggest)
     cx = x + w // 2
-    cy = y + h // 2
-    cv2.rectangle(display, (x, y), (x+w,y+h), (0, 255, 0), 3)
-    #cv2.drawContours(display, biggest, -1, (255, 0, 255), 7)
+    # cy = y + h // 2
+    cv2.putText(display, str("trash"), (cx, y), cv2.FONT_ITALIC, 0.7, (0, 255, 0), 1)
+    cv2.rectangle(display, (x, y), (x+w, y+h), (0, 255, 0), 3)
+    # cv2.drawContours(display, biggest, -1, (255, 0, 255), 7)
     return display
 
 
