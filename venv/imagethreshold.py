@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-
+from scipy import stats
 cap = cv2.VideoCapture(0)
 
 
@@ -36,13 +36,20 @@ def otsumethod(img):
     print("Otsu's algorithm implementation thresholding result: ", threshold)
     return threshold
 
+def signaltonoise(a, axis=0, ddof=0):
+    a = np.asanyarray(a)
+    m = a.mean(axis)
+    sd = a.std(axis=axis, ddof=ddof)
+    return np.where(sd == 0, 0, m/sd)
 
 def displaythresh(img):
+    snrimg = signaltonoise(img)
+    blur = cv2.GaussianBlur(img, (5, 5), 0)
     ret, thresh1 = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
     ret2, thresh2 = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY_INV)
-    ret3, thresh3 = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-    ret4, thresh4 = cv2.threshold(img, 127, 255, cv2.THRESH_TOZERO)
-    ret5, thresh5 = cv2.threshold(img, 127, 255, cv2.THRESH_TOZERO_INV)
+    ret3, thresh3 = cv2.threshold(img, 0, 255, cv2.THRESH_OTSU)
+    ret4, thresh4 = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY_INV+cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    ret5, thresh5 = cv2.threshold(blur, 127, 255, cv2.THRESH_BINARY_INV)
     # titles = np.array([['Original Image', 'BINARY'], ['BINARY_INV', 'TRUNC'],[ 'TOZERO', 'TOZERO_INV']],dtype=object)
     images1 = np.concatenate((img, thresh1, thresh2), axis=1)  # concatenate horizontally
     images2 = np.concatenate((thresh3, thresh4, thresh5), axis=1)  # concatenate vertically
