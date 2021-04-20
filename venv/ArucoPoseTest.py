@@ -24,7 +24,7 @@ cap = cv2.VideoCapture(0)
 
 while True:
     ret, frame = cap.read()
-    frame = cv2.imread("results/Tag2.jpg")
+    #frame = cv2.imread("results/Tag2.jpg")
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     aruco_dict = aruco.Dictionary_get(aruco.DICT_APRILTAG_36H11)
@@ -32,7 +32,8 @@ while True:
     corners, ids, rejectedImgPoints = aruco.detectMarkers(
         gray, aruco_dict, parameters=arucoParameters, cameraMatrix=camera_matrix, distCoeff=dist_coeff)
     # print(ids)
-
+    ArucoListArea = []
+    ArucoListC = []
     if np.all(ids is not None):
         rvec, tvec, markerPoints = aruco.estimatePoseSingleMarkers(corners, 0.02, camera_matrix,
                                                 dist_coeff)
@@ -45,63 +46,37 @@ while True:
         display = aruco.drawDetectedMarkers(frame, corners, ids)
         for var in list(range(rows)):
             aruco.drawAxis(frame, camera_matrix, dist_coeff, rvec[var], tvec[var], 0.02)
-
-        # coded by isaac vargas
-        # if rows > 1:
-        #     rvec1= rvec[0]
-        #     tvec1= tvec[0]
-        #     rvec2 = rvec[1]
-        #     tvec2 = tvec[1]
-        #     aruco.drawAxis(frame, camera_matrix, dist_coeff, rvec1, tvec1, 0.02)  # Draw Axis
-        #     aruco.drawAxis(frame, camera_matrix, dist_coeff, rvec2, tvec2, 0.02)  # Draw Axis
-        # elif rows > 2:
-        #     rvec1 = rvec[0]
-        #     tvec1 = tvec[0]
-        #
-        #     rvec2 = rvec[1]
-        #     tvec2 = tvec[1]
-        #
-        #     rvec3 = rvec[2]
-        #     tvec3 = rvec[2]
-        #     aruco.drawAxis(frame, camera_matrix, dist_coeff, rvec1, tvec1, 0.02)  # Draw Axis
-        #     aruco.drawAxis(frame, camera_matrix, dist_coeff, rvec2, tvec2, 0.02)  # Draw Axis
-        #     aruco.drawAxis(frame, camera_matrix, dist_coeff, rvec3, tvec3, 0.02)  # Draw Axis
-        # else:
-        #     aruco.drawAxis(frame, camera_matrix, dist_coeff, rvec, tvec, 0.02)  # Draw Axis
-        p1 = (corners[0][0][0][0], corners[0][0][0][1]) # top left corner
-        p2 = (corners[0][0][1][0], corners[0][0][1][1]) #top right corner
-        p3 = (corners[0][0][2][0], corners[0][0][2][1]) # bottom left corner
-        p4 = (corners[0][0][3][0], corners[0][0][3][1]) # bottom right corner
-
-        print(" x1:")
-        print(p1)
-
-        print("\n x2:")
-        print(p2)
-
-        print("\n x3:")
-        print(p3)
-
-        print("\n x4:")
-        print(p4)
-        im_dst = frame
-        im_src = cv2.imread("Objects/52.jpg")
-        size = im_src.shape
-        pts_dst = np.array([p1, p2, p3, p4])  # pts1
-        pts_src = np.array(
-            [
-                [0, 0],
-                [size[1] - 1, 0],
-                [size[1] - 1, size[0] - 1],
-                [0, size[0] - 1]
-            ], dtype=float
-        )
-
-        h, status = cv2.findHomography(pts_src, pts_dst)
-        temp = cv2.warpPerspective(im_src, h, (im_dst.shape[1], im_dst.shape[0]))
-        cv2.fillConvexPoly(im_dst, pts_dst.astype(int), 0, 16)
-        im_dst = im_dst + temp
-        cv2.imshow('Display', im_dst)
+            area = cv2.contourArea(corners[var])
+            ArucoListArea.append(area)
+            cx = (corners[0][0][0] + corners[0][3][0]) / 2
+            cy = (corners[0][0][1] + corners[0][3][1]) / 2
+            ArucoListC.append([cx, cy])
+            # cv2.putText(frame, str("area"), (ArucoListC[0], ArucoListC[1]), cv2.FONT_ITALIC, 0.7, (0, 255, 0), 1)
+            print(ArucoListC)
+            print(ArucoListArea)
+            im_dst = frame
+            drawIm = False # change to True to embed image onto marker
+            if drawIm:
+                p1 = (corners[0][0][0][0], corners[0][0][0][1])  # top left corner
+                p2 = (corners[0][0][1][0], corners[0][0][1][1])  #top right corner
+                p3 = (corners[0][0][2][0], corners[0][0][2][1])  # bottom left corner
+                p4 = (corners[0][0][3][0], corners[0][0][3][1])  # bottom right corner
+                im_src = cv2.imread("Objects/0.jpg")
+                size = im_src.shape
+                pts_dst = np.array([p1, p2, p3, p4])  # pts1
+                pts_src = np.array(
+                    [
+                        [0, 0],
+                        [size[1] - 1, 0],
+                        [size[1] - 1, size[0] - 1],
+                        [0, size[0] - 1]
+                    ], dtype=float
+                )
+                h, status = cv2.findHomography(pts_src, pts_dst)
+                temp = cv2.warpPerspective(im_src, h, (im_dst.shape[1], im_dst.shape[0]))
+                cv2.fillConvexPoly(im_dst, pts_dst.astype(int), 0, 16)
+                im_dst = im_dst + temp
+            cv2.imshow('Display', im_dst)
     else:
         display = frame
         cv2.imshow('Display', frame)

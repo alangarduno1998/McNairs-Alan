@@ -45,10 +45,10 @@ def findaruco(corners, id, frame, frameembed, ArucoListC, ArucoListArea, drawPos
     area = cv2.contourArea(corners)
     ArucoListArea.append(area)
     if drawPose:
-        aruco.drawAxis(frame, camera_matrix, dist_coeff, rvec, tvec, 0.02)
+        aruco.drawAxis(frame, camera_matrix, dist_coeff, rvec, tvec, 0.0375)
         # testing this
         cv2.putText(frame, str(int(area)), (int(cx), int(cy)), cv2.FONT_ITALIC, 0.7, (0, 255, 0), 1)
-        #cv2.putText(frame, str(int(cx)) + str(int(cx)), (int(cx), int(cy)), cv2.FONT_ITALIC, 0.7, (0, 255, 0), 1)
+        cv2.putText(frame, str(int(cx)) +str(",") + str(int(cy)), (int(cx), int(corners[0][0][1])), cv2.FONT_ITALIC, 0.7, (0, 255, 0), 1)
 
     frameout = frame
     if drawIm:
