@@ -3,9 +3,11 @@ import cv2
 import numpy as np
 import os
 import glob2
+import cv2.aruco as aruco
 
 import yaml
 
+aruco.c
 # Define the dimensions of checkerboard
 CHECKERBOARD = (6, 9)
 

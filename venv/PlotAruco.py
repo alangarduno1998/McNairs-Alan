@@ -26,7 +26,6 @@ def findarucomarkers(frame, markerSize = 6, totalMarkers=250, draw=True):
     frame_markers = aruco.drawDetectedMarkers(frame.copy(), corners, ids)
     return corners, ids, rejectedImgPoints, frame_markers
 
-
 def plotid(corners, ids, frame_markers):
     plt.figure()
     plt.imshow(frame_markers)
@@ -35,7 +34,6 @@ def plotid(corners, ids, frame_markers):
         plt.plot([c[:, 0].mean()], [c[:, 1].mean()], "o", label="id={0}".format(ids[i]))
     plt.legend()
     plt.show(block=False)
-
 
 def plotrej(corners,ids,rejectedImgPoints, frame_markers):
     plt.figure()
@@ -91,11 +89,8 @@ def quad_area(data):
     a = -.5 * (np.cross(-e1, e2, axis=1) + np.cross(-e3, e4, axis=1))
     return a
 
-
 # -- load image to plot aruco
 frame = cv2.imread("results/Tag2_1.jpg")
-
-# -- show image of aruco tags
 plot(frame)
 
 # -- find aruco tag and draw markers

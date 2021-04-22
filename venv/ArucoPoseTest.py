@@ -46,7 +46,7 @@ while True:
         display = aruco.drawDetectedMarkers(frame, corners, ids)
         for var in list(range(rows)):
             aruco.drawAxis(frame, camera_matrix, dist_coeff, rvec[var], tvec[var], 0.02)
-            area = cv2.contourArea(corners[var])
+            area = cv2.contourArea(corners)
             ArucoListArea.append(area)
             cx = (corners[0][0][0] + corners[0][3][0]) / 2
             cy = (corners[0][0][1] + corners[0][3][1]) / 2

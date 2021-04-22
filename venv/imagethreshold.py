@@ -1,8 +1,7 @@
 import cv2
 import numpy as np
 from scipy import stats
-cap = cv2.VideoCapture(0)
-
+cap = cv2.VideoCapture(r"TrashDetector\VideoofDebris3StutteringFixed.mp4")
 
 def resizeimg(img):
     scale_percent = 100  # percent of original size
@@ -48,7 +47,7 @@ def displaythresh(img):
     ret, thresh1 = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
     ret2, thresh2 = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY_INV)
     ret3, thresh3 = cv2.threshold(img, 0, 255, cv2.THRESH_OTSU)
-    ret4, thresh4 = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY_INV+cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    ret4, thresh4 = cv2.threshold(img, 127, 255, cv2.THRESH_OTSU)
     ret5, thresh5 = cv2.threshold(blur, 127, 255, cv2.THRESH_BINARY_INV)
     # titles = np.array([['Original Image', 'BINARY'], ['BINARY_INV', 'TRUNC'],[ 'TOZERO', 'TOZERO_INV']],dtype=object)
     images1 = np.concatenate((img, thresh1, thresh2), axis=1)  # concatenate horizontally
@@ -57,7 +56,6 @@ def displaythresh(img):
     return img
 
 
-cap = cv2.VideoCapture(r"TrashDetector\VideoofDebris3StutteringFixed.mp4")
 while True:
     ret, img = cap.read()
     img = cv2.resize(img, (480,360))
