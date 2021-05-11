@@ -1,17 +1,10 @@
-from djitellopy import tello
 import cv2
 import numpy as np
-#import KeypressModule as kp
-
+import scipy.io
+import scipy.stats
 frameWidth = 480
 frameHeight = 360
-
-
-# drone = tello.Tello()
-# drone.connect()
-# print(drone.get_battery())
-# drone.streamon()
-
+hsvvals_red = [98, 0, 0, 179, 255, 255]
 def blobdet(img, blob=False):
     if blob:
         detector = cv2.SimpleBlobDetector()
@@ -24,15 +17,34 @@ def blobdet(img, blob=False):
         detector = cv2.SimpleBlobDetector_create(params)
         keypoints = detector.detect(img)
         blobb = cv2.drawKeypoints(img, keypoints, np.array([]), (0, 0, 255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+        cv2.imshow('blobb', blobb)
         return blobb
     else:
         return img
 
 
+def colorthreshold(image, hsvvals_red, colort=False):
+    if colort:
+        hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+        lower = np.array([hsvvals_red[0], hsvvals_red[1], hsvvals_red[2]])
+        upper = np.array([hsvvals_red[3], hsvvals_red[4], hsvvals_red[5]])
+        mask = cv2.inRange(hsv, lower, upper)
+        result = cv2.bitwise_and(image, image, mask=mask)
+        return result
+    else:
+        return image
+
+def calculate_psnr(img1, img2, max_value=255):
+    """"Calculating peak signal-to-noise ratio (PSNR) between two images."""
+    mse = np.mean((np.array(img1, dtype=np.float32) - np.array(img2, dtype=np.float32)) ** 2)
+    if mse == 0:
+        return 100
+    return 20 * np.log10(max_value / (np.sqrt(mse)))
+
 def edgethreshold(result, display, edget=False):
     if edget:
         g = cv2.cvtColor(result, cv2.COLOR_RGB2GRAY)
-        edge = cv2.Canny(g, 60, 60)
+        edge = cv2.Canny(g, 560, 560)
         # plotting biggest contour to second frame
         edgeres = cv2.bitwise_and(result, result, mask=edge)
         contours, h = cv2.findContours(edge,
@@ -47,31 +59,31 @@ def edgethreshold(result, display, edget=False):
         cv2.rectangle(display, (x, y), (x+w, y+h), (255, 0, 255), 3)
         cv2.putText(display, str("trash"), (cx, y), cv2.FONT_ITALIC, 0.7, (255, 0, 255), 1)
         # cv2.drawContours(display, contours[0], -1, (0, 0, 255), thickness=5)
+        cv2.imshow('edgeres', edgeres)
         return edgeres
     else:
         return result
-
 
 def preprocessing(img,prep=False):
     if prep:
 
         image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-        r, t = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
+        r, t = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
         result = cv2.bitwise_and(img, img, mask=t)
+        cv2.imshow('preprocessing', result)
+        cv2.imshow('t', t)
         return result
     else:
         return img
 
-
 def filtering(img, blur=False):
     if blur:
         blur = cv2.GaussianBlur(img, (5, 5), 0)
+        cv2.imshow('gaussianBlur', blur)
         return blur
     else:
         return img
-
-
 
 def empty(a):
     pass
@@ -97,14 +109,43 @@ while True:
     # -- change to True for filtering
     img=filtering(img, blur=True)
 
+    # -- calculate snr
+    snr = calculate_psnr(original,img)
+    print(snr)
+
+    # -- histogram equalization
+    equ = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    equ = cv2.equalizeHist(equ)
+    cv2.imshow('hist', equ)
+    #img=equ
+
+    dft = cv2.dft(np.float32(equ), flags=cv2.DFT_COMPLEX_OUTPUT)
+    dft_shift = np.fft.fftshift(dft)
+    magnitude_spectrum = 20 * np.log(cv2.magnitude(dft_shift[:, :, 0], dft_shift[:, :, 1]))
+    rows, cols = equ.shape
+    #rows, cols = int(rows), int(cols)
+    crow, ccol = round(rows / 2), round(cols / 2)
+    # create a mask first, center square is 1, remaining all zeros
+    mask = np.zeros((rows, cols, 2), np.uint8)
+    mask[crow - 30:crow + 30, ccol - 30:ccol + 30] = 1
+    # apply mask and inverse DFT
+    fshift = dft_shift * mask
+    f_ishift = np.fft.ifftshift(fshift)
+    img_back = cv2.idft(f_ishift)
+    img_back = cv2.magnitude(img_back[:, :, 0], img_back[:, :, 1])
+    cv2.imshow('fft',img_back)
+
+    # -- change to True for preprocessing
+    img = preprocessing(img, prep=True)
+
+    # -- change to True for preprocessing
+    img = colorthreshold(img, hsvvals_red, colort=True)
+
     # -- switch to true for edgethresholding
     img = edgethreshold(img, original, edget=True)
 
     # -- change to true for blob detection
-    img = blobdet(img, blob=True)
-
-    # -- change to True for preprocessing
-    img = preprocessing(img, prep=False)
+    img = blobdet(img, blob=False)
 
     imgHsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     h_min = cv2.getTrackbarPos("HUE Min", "HSV")
@@ -118,11 +159,11 @@ while True:
     upper = np.array([h_max, s_max, v_max])
     mask = cv2.inRange(imgHsv, lower, upper)
     result = cv2.bitwise_and(img, img, mask=mask)
-    print(f'[{h_min}, {s_min}, {v_min}, {h_max}, {s_max}, {v_max}]')
+    #print(f'[{h_min}, {s_min}, {v_min}, {h_max}, {s_max}, {v_max}]')
 
     mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
     hStack = np.hstack([img, mask, result])
-    cv2.imshow('PP STACK', hStack)
+    cv2.imshow('Processing Stack', hStack)
     cv2.imshow('Original', original)
     if cv2.waitKey(100) and 0xFF == ord('q'):
         break

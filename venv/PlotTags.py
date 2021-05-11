@@ -89,7 +89,6 @@ def quad_area(data):
 
 # -- load image to plot aruco
 frame = cv2.imread("results/Tag2_1.jpg")
-frame = cv2.
 plot(frame)
 
 # -- find aruco tag and draw markers

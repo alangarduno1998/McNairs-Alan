@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import glob
-width, height = 480, 360
+width, height = 1280, 720
 cap = cv2.VideoCapture("VideoofDebris3StutteringFixed.mp4")
 hsvvals_red = [98, 0, 88, 179, 255, 255]
 threshold = 0.3
@@ -53,7 +53,7 @@ def edgethreshold(result, display):
     # cy = y + h // 2
     cv2.rectangle(display, (x, y), (x+w, y+h), (255, 0, 255), 3)
     cv2.putText(display, str("trash"), (cx, y), cv2.FONT_ITALIC, 0.7, (255, 0, 255), 1)
-    # cv2.drawContours(display, contours[0], -1, (0, 0, 255), thickness=5)
+    cv2.drawContours(display, contours[0], -1, (0, 0, 255), thickness=5)
     return edgeres
 
 
@@ -75,15 +75,15 @@ while cap.isOpened():
 
     # -- applying thresholding to image
     image, gray, t = binarythreshold(image)
-    cv2.imshow(" binary thresh ", image)
+    #cv2.imshow(" binary thresh ", image)
 
     # -- applying color thresholding
     result, mask = colorthreshold(image, hsvvals_red)
-    cv2.imshow(" color thresh ", result)
+    #cv2.imshow(" color thresh ", result)
 
     # -- apply edge thresholding
     edgeresult = edgethreshold(result, display)
-    cv2.imshow(" edge thresh ", edgeresult)
+    #cv2.imshow(" edge thresh ", edgeresult)
 
     # -- apply contour to detect objects
     display = findcontours(mask, display)  # color threshold mask and frame to attach contours needs to be predefined
@@ -96,7 +96,7 @@ while cap.isOpened():
     #     print(img_array[i])
     # out.release()
 
-    cv2.imshow("Output", np.hstack([frame, image, result, display]))
+    cv2.imshow("Output", np.hstack([display]))
     if cv2.waitKey(100) & 0xFF == ord('q'):
         break
 

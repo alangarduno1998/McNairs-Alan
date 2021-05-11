@@ -57,7 +57,7 @@ while cap.isOpened():
 
 
     # -- applying color thresholding
-    result, mask = colorthreshold(image, hsvvals_red)
+    #result, mask = colorthreshold(image, hsvvals_red)
     cv2.imshow(" color thresh ", result)
 
     # -- apply contour to detect objects

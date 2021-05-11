@@ -113,4 +113,3 @@ displayrej(rejectedImgPoints)
 
 # -- this is needed to keep plots up or else it clears when process ends
 plt.show()
-

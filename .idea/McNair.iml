@@ -4,8 +4,10 @@
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/venv" />
       <excludeFolder url="file://$MODULE_DIR$/aruco" />
+      <excludeFolder url="file://$MODULE_DIR$/Capstone/Cappystone" />
+      <excludeFolder url="file://$MODULE_DIR$/Cappystone" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.8 (McNairs-Alan)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.7 (McNair)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>

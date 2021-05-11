@@ -32,12 +32,15 @@ def findarucomarkers(frame, markersize = 6, totalmarkers=250, draw=True):
     return [corners, ids]
 
 
-def findaruco(corners, id, frame, frameembed, ArucoListC, ArucoListArea, drawPose=True, drawIm=True):
+def findaruco(corners, id, frame, frameembed, ArucoListC, ArucoListArea,ArucoListRot, ArucoListTrans , drawPose=True, drawIm=True):
     cx = (corners[0][0][0] +corners[0][2][0]) / 2
     cy = (corners[0][0][1] + corners[0][3][1]) / 2
     rvec, tvec, markerPoints = aruco.estimatePoseSingleMarkers(corners, 0.02, camera_matrix,
                                                                dist_coeff)
     (rvec - tvec).any()  # get rid of that nasty numpy value array error
+    ArucoListC.append([cx, cy])
+    ArucoListRot.append(rvec)
+    ArucoListTrans.append(tvec)
     ArucoListC.append([cx, cy])
     area = cv2.contourArea(corners)
     ArucoListArea.append(area)
@@ -67,7 +70,7 @@ def findaruco(corners, id, frame, frameembed, ArucoListC, ArucoListArea, drawPos
         frameout = cv2.warpPerspective(frameembed, matrix, (frame.shape[1], frame.shape[0]))
         cv2.fillConvexPoly(frame, pts_dst.astype(int), 0, 16)
         frameout = frame + frameout
-    return frameout, ArucoListC, ArucoListArea
+    return frameout, ArucoListC, ArucoListArea, ArucoListRot, ArucoListTrans
 
 
 def main():
@@ -75,15 +78,17 @@ def main():
     objdicts = loadarucoimages("Objects")
     while True:
         ret, frame = cap.read()
-        #loadarucoimages("Objects")
+        loadarucoimages("Objects")
         ArucoListArea = []
         ArucoListC = []
-        info = [[0, 0], [0]]
+        ArucoListRot = []
+        ArucoListTrans = []
+        info = [[0, 0], [0], [0,0,0], [0,0,0]]
         arucofound = findarucomarkers(frame)
         if len(arucofound[0]) != 0:
             for corners, id in zip(arucofound[0], arucofound[1]):
                 if int(id) in objdicts.keys():
-                    frame, info[0], info[1] = findaruco(corners, id, frame, objdicts[int(id)], ArucoListC, ArucoListArea, drawPose=True, drawIm=True)
+                    frame, info[0], info[1], info[2], info[3] = findaruco(corners, id, frame, objdicts[int(id)], ArucoListC, ArucoListArea, ArucoListRot, ArucoListTrans, drawPose=True, drawIm=True)
         if len(info[1]) == 1:
             print(info[0],info[1])
         cv2.imshow('Display', frame)
