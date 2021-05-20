@@ -8,13 +8,10 @@ while(cap.isOpened()):
     #reading video to frames
     ret, frame = cap.read()
     frame = cv2.resize(frame, (width, height))
-    #frame = cv2.flip(frame, 0)
     ret, display = cap.read()
     ret, image = cap.read()
     display = cv2.resize(display, (width, height))
-    #display = cv2.flip(display, 0)
     image = cv2.resize(image, (width, height))
-    #image = cv2.flip(image, 0)
 
     ret, mask = cap.read()
     mask = cv2.resize(mask, (width, height))

@@ -7,7 +7,6 @@ import cv2.aruco as aruco
 
 import yaml
 
-aruco.c
 # Define the dimensions of checkerboard
 CHECKERBOARD = (6, 9)
 

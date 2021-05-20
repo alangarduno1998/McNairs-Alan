@@ -5,11 +5,8 @@ width, height = 1280, 720
 cap = cv2.VideoCapture("VideoofDebris3StutteringFixed.mp4")
 hsvvals_red = [98, 0, 88, 179, 255, 255]
 threshold = 0.3
-
 # img_array = []
 # out = cv2.VideoWriter('VideoofDebrisdetected.avi', cv2.VideoWriter_fourcc(*'DIVX'), 15, size)
-
-
 def makeframes(cap, width, height):
     ret, frame = cap.read()
     frame = cv2.resize(frame, (width, height))
@@ -17,8 +14,6 @@ def makeframes(cap, width, height):
     display = frame.copy()
     immask = frame.copy()
     return frame, image, display, immask
-
-
 def binarythreshold(image):
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
@@ -26,8 +21,6 @@ def binarythreshold(image):
     r, t = cv2.threshold(blur, 127, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
     image = cv2.bitwise_and(immask, immask, mask=t)
     return image, gray, t
-
-
 def colorthreshold(image, hsvvals_red):
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     lower = np.array([hsvvals_red[0], hsvvals_red[1], hsvvals_red[2]])
@@ -35,8 +28,6 @@ def colorthreshold(image, hsvvals_red):
     mask = cv2.inRange(hsv, lower, upper)
     result = cv2.bitwise_and(image, image, mask=mask)
     return result, mask
-
-
 def edgethreshold(result, display):
     g = cv2.cvtColor(result, cv2.COLOR_RGB2GRAY)
     edge = cv2.Canny(g, 60, 60)
@@ -55,8 +46,6 @@ def edgethreshold(result, display):
     cv2.putText(display, str("trash"), (cx, y), cv2.FONT_ITALIC, 0.7, (255, 0, 255), 1)
     cv2.drawContours(display, contours[0], -1, (0, 0, 255), thickness=5)
     return edgeres
-
-
 def findcontours(mask, display):
     contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     biggest = max(contours, key=cv2.contourArea)
@@ -67,8 +56,6 @@ def findcontours(mask, display):
     cv2.rectangle(display, (x, y), (x+w, y+h), (0, 255, 0), 3)
     # cv2.drawContours(display, biggest, -1, (255, 0, 255), 7)
     return display
-
-
 while cap.isOpened():
     # -- making frames and resizing
     frame, image, display, immask = makeframes(cap, width, height)
@@ -99,6 +86,5 @@ while cap.isOpened():
     cv2.imshow("Output", np.hstack([display]))
     if cv2.waitKey(100) & 0xFF == ord('q'):
         break
-
 cap.release()
 cv2.destroyAllWindows()

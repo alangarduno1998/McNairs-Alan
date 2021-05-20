@@ -21,8 +21,6 @@ def blobdet(img, blob=False):
         return blobb
     else:
         return img
-
-
 def colorthreshold(image, hsvvals_red, colort=False):
     if colort:
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
@@ -33,14 +31,12 @@ def colorthreshold(image, hsvvals_red, colort=False):
         return result
     else:
         return image
-
 def calculate_psnr(img1, img2, max_value=255):
     """"Calculating peak signal-to-noise ratio (PSNR) between two images."""
     mse = np.mean((np.array(img1, dtype=np.float32) - np.array(img2, dtype=np.float32)) ** 2)
     if mse == 0:
         return 100
     return 20 * np.log10(max_value / (np.sqrt(mse)))
-
 def edgethreshold(result, display, edget=False):
     if edget:
         g = cv2.cvtColor(result, cv2.COLOR_RGB2GRAY)
@@ -63,7 +59,6 @@ def edgethreshold(result, display, edget=False):
         return edgeres
     else:
         return result
-
 def preprocessing(img,prep=False):
     if prep:
 
@@ -76,7 +71,6 @@ def preprocessing(img,prep=False):
         return result
     else:
         return img
-
 def filtering(img, blur=False):
     if blur:
         blur = cv2.GaussianBlur(img, (5, 5), 0)
@@ -84,10 +78,6 @@ def filtering(img, blur=False):
         return blur
     else:
         return img
-
-def empty(a):
-    pass
-
 
 cv2.namedWindow("HSV")
 cv2.resizeWindow("HSV", 640, 240)
