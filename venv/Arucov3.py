@@ -3,7 +3,7 @@ import numpy as np
 import cv2
 import cv2.aruco as aruco
 import os
-
+import time
 camera_matrix = [[1448, 0, 624], [0, 1448, 316],
                  [0, 0, 1]]
 camera_matrix = np.float32(camera_matrix)
@@ -11,15 +11,21 @@ dist_coeff = [0.05437520427175414, 0.010684173729094198, 0.003107828628462368, -
 dist_coeff = np.float32(dist_coeff)
 print("\n camera_matrix: \n" + str(camera_matrix)), print("\n dist_coeff: \n" + str(dist_coeff))
 cap = cv2.VideoCapture(0)
-
+cTime, pTime = 0,0
+w, h = 480, 360
 while True:
     ret, frame = cap.read()
+    frame = cv2.resize(frame, (w, h), interpolation=cv2.INTER_AREA)
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     aruco_dict = aruco.Dictionary_get(aruco.DICT_4X4_50)
     arucoParameters = aruco.DetectorParameters_create()
     corners, ids, rejectedImgPoints = aruco.detectMarkers(
         gray, aruco_dict, parameters=arucoParameters, cameraMatrix=camera_matrix, distCoeff=dist_coeff)
     ArucoListArea, ArucoListC = [], []
+    cTime = time.time()
+    fps = 1/(cTime-pTime)
+    pTime= cTime
+    cv2.putText(frame, str(int(fps)), (10,70), cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 3)
     if np.all(ids is not None):
         rvec, tvec, markerPoints = aruco.estimatePoseSingleMarkers(corners, 0.02, camera_matrix,
                                                 dist_coeff)

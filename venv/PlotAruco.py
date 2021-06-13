@@ -40,7 +40,7 @@ def plotrej(corners,ids,rejectedImgPoints, frame_markers):
             plt.plot([c[:, 0].mean()], [c[:, 1].mean()], "+", label="id={0}".format(ids[i]))
     plt.legend()
     plt.show(block=False)
-def displaydata(corners):
+def displaydata(corners,ids):
     corners2 = np.array([c[0] for c in corners])
     data = pd.DataFrame({"x": corners2[:, :, 0].flatten(), "y": corners2[:, :, 1].flatten()},
                         index=pd.MultiIndex.from_product([ids.flatten(),
@@ -52,11 +52,11 @@ def displaydata(corners):
     data["m4"] = data[["c4", "c1"]].mean(axis=1)
     data["o"] = data[["m1", "m2", "m3", "m4"]].mean(axis=1)
     print(data.to_markdown())
-def displayrej(corners):
+def displayrej(corners,ids):
     corners2 = np.array([r[0] for r in corners])
     data = pd.DataFrame({"x": corners2[:, :, 0].flatten(), "y": corners2[:, :, 1].flatten()},
                     index=pd.MultiIndex.from_product([ids.flatten(),
-                                                      ["r{0}".format(i)for i in np.arange(1)+1]], names=["marker", ""]))
+                                                      ["r{0}".format(i)for i in np.arange(3)+1]], names=["marker", ""]))
     data = data.unstack().swaplevel(0, 1, axis=1).stack()
     data["m1"] = data[["r1"]].mean(axis=1)
     data["o"] = data[["m1"]].mean(axis=1)
@@ -81,9 +81,10 @@ def main():
     # -- plot rejectedImgPoints
     plotrej(corners, ids, rejectedImgPoints, frame_markers)
     # -- print out results
-    displaydata(corners)
-    displayrej(rejectedImgPoints)
+    displaydata(corners,ids)
+    displayrej(rejectedImgPoints,ids)
     # -- this is needed to keep plots up or else it clears when process ends
     plt.show()
+
 if __name__ == "__main__":
     main()

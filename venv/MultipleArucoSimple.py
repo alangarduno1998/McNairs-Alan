@@ -2,12 +2,15 @@ import numpy as np
 import cv2
 import cv2.aruco as aruco
 import os
-def findarucomarkers(frame, markersize = 4, totalmarkers=50):
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+def loadarucoparam(markersize = 4, totalmarkers =50):
     key = getattr(aruco, f'DICT_{markersize}X{markersize}_{totalmarkers}')
     #key = getattr(aruco, f'DICT_ARUCO_ORIGINAL')
     aruco_dict = aruco.Dictionary_get(key)
     arucoparameters = aruco.DetectorParameters_create()
+    return arucoparameters, aruco_dict
+
+def findarucomarkers(frame, arucoparameters, aruco_dict):
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     corners, ids, rejectedimgpoints = aruco.detectMarkers(gray, aruco_dict, parameters = arucoparameters)
     display = aruco.drawDetectedMarkers(frame, corners, ids)
     return [corners, ids]
@@ -20,10 +23,11 @@ def drawaruco(cs, id, frame, ArucoListC, ArucoListArea):
     return frame, ArucoListC, ArucoListArea
 def main():
     cap = cv2.VideoCapture(0)
+    arucoparameters, aruco_dict=loadarucoparam()
     while True:
         ret, frame = cap.read()
         ArucoListArea, ArucoListC, info = [], [], [[0, 0], [0]]
-        arucofound = findarucomarkers(frame)
+        arucofound = findarucomarkers(frame, arucoparameters, aruco_dict)
         if len(arucofound[0]) != 0:
             for corners, id in zip(arucofound[0], arucofound[1]):
                 frame, info[0], info[1] = drawaruco(corners, id, frame, ArucoListC, ArucoListArea)
